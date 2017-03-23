@@ -1,0 +1,23 @@
+{
+    "name": "yxd/game-sdk",
+    "description": "接入游戏兜平台sdk",
+    "autoload": {
+        "psr-4": {
+            "Yxd\\Game\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "魏永胜",
+            "email": "weiyongsheng@innotechx.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "guzzlehttp/guzzle": "~5.0|~6.0"
+    },
+    "require-dev": {
+        "mockery/mockery": "~0.9",
+        "phpunit/phpunit": "~4.0"
+    }
+}
