@@ -10,7 +10,7 @@ use Psr\Http\Message\ResponseInterface;
 class API extends AbstractAPI
 {
     // api
-    const API_DOMAIN = 'http://localhost/';
+    const API_DOMAIN = 'http://localhost/api/';
     const USER_INFO_PATH = 'user/getUserInfo';
 
     /**
@@ -81,10 +81,13 @@ class API extends AbstractAPI
         $params['nonce'] = sha1(uniqid(mt_rand(1, 1000000), true));
         $params['timestamp'] = time();
         $params = array_filter($params);
-        $params['signature'] = generate_sign($params, $this->merchant->key, 'md5');
-
+        $params['signature'] = generate_sign($params, $this->config->app_secret, 'sha1');
+        $options['exceptions'] = false;
         $options = array_merge([
-            'body' => $params,
+            'body'    => json_encode($params),
+            'headers' => [
+                'content-type' => 'application/json',
+            ],
         ], $options);
 
         $response = $this->getHttp()->request($api, $method, $options);

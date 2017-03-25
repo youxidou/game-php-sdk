@@ -12,12 +12,10 @@ class User extends API
     protected $request;
 
     /**
-     * Fetch a user by open id.
+     * Fetch a user.
      *
-     * @param string $openId
-     * @param string $lang
-     *
-     * @return array
+     * @return \Yxd\Game\Support\Collection
+     * @throws FaultException
      */
     public function get()
     {
@@ -34,7 +32,7 @@ class User extends API
     {
         $request = $this->getRequest();
 
-        if ($request->isValid()) {
+        if (!$request->isValid()) {
             throw new FaultException('Invalid request payloads.', 400);
         }
 

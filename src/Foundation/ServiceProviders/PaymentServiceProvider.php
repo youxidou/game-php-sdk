@@ -2,6 +2,7 @@
 
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use Yxd\Game\Payment\Payment;
 
 /**
  * Class PaymentServiceProvider.
@@ -18,17 +19,8 @@ class PaymentServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $pimple)
     {
-        $pimple['merchant'] = function ($pimple) {
-            $config = array_merge(
-                ['app_id' => $pimple['config']['app_id']],
-                $pimple['config']->get('payment', [])
-            );
-
-            return new Merchant($config);
-        };
-
         $pimple['payment'] = function ($pimple) {
-            return new Payment($pimple['merchant']);
+            return new Payment($pimple['config']);
         };
     }
 }

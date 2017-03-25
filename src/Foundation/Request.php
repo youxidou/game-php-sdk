@@ -38,9 +38,9 @@ class Request
      */
     public function isValid()
     {
-        $localSign = generate_sign($this->getData()->except('sign')->all(), $this->config->app_secret, 'md5');
+        $localSign = generate_sign($this->getData()->except('signature')->all(), $this->config->app_secret, 'sha1');
 
-        return $localSign === $this->getData()->get('sign');
+        return $localSign === $this->getData()->get('signature');
     }
 
     /**

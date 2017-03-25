@@ -3,7 +3,6 @@
 use Yxd\Game\Core\Exceptions\HttpException;
 use Yxd\Game\Support\Collection;
 use GuzzleHttp\Middleware;
-use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 

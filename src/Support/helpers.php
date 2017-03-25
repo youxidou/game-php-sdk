@@ -10,12 +10,10 @@ if (!function_exists('generate_sign')) {
      *
      * @return string
      */
-    function generate_sign(array $attributes, $key, $encryptMethod = 'md5')
+    function generate_sign(array $attributes, $key, $encryptMethod = 'sha1')
     {
         ksort($attributes);
 
-        $attributes['key'] = $key;
-
-        return strtoupper(call_user_func_array($encryptMethod, [urldecode(http_build_query($attributes))]));
+        return call_user_func_array($encryptMethod, [urldecode(http_build_query($attributes)) . $key]);
     }
 }

@@ -1,10 +1,8 @@
 <?php namespace Yxd\Game\Payment;
 
-use EasyWeChat\Core\Exceptions\FaultException;
-use EasyWeChat\Support\Url as UrlHelper;
-use EasyWeChat\Support\XML;
-use Overtrue\Socialite\AccessTokenInterface;
-use Symfony\Component\HttpFoundation\Response;
+use GuzzleHttp\Psr7\Request;
+use Yxd\Game\Core\API;
+use Yxd\Game\Core\Exceptions\FaultException;
 
 /**
  * Class Payment.
@@ -13,10 +11,6 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class Payment
 {
-    /**
-     * Scheme base path.
-     */
-    const SCHEME_PATH = 'weixin://wxpay/bizpayurl';
 
     /**
      * @var API
@@ -24,42 +18,20 @@ class Payment
     protected $api;
 
     /**
-     * Merchant instance.
+     * config instance.
      *
-     * @var \EasyWeChat\Payment\Merchant
+     * @var \Yxd\Game\Support\Config
      */
-    protected $merchant;
+    protected $config;
 
     /**
      * Constructor.
      *
      * @param Merchant $merchant
      */
-    public function __construct(Merchant $merchant)
+    public function __construct(Config $config)
     {
-        $this->merchant = $merchant;
-    }
-
-    /**
-     * Build payment scheme for product.
-     *
-     * @param string $productId
-     *
-     * @return string
-     */
-    public function scheme($productId)
-    {
-        $params = [
-            'appid'      => $this->merchant->app_id,
-            'mch_id'     => $this->merchant->merchant_id,
-            'time_stamp' => time(),
-            'nonce_str'  => uniqid(),
-            'product_id' => $productId,
-        ];
-
-        $params['sign'] = generate_sign($params, $this->merchant->key, 'md5');
-
-        return self::SCHEME_PATH . '?' . http_build_query($params);
+        $this->config = $config;
     }
 
     /**
@@ -67,7 +39,7 @@ class Payment
      *
      * @param callable $callback
      *
-     * @return Response
+     * @return string
      */
     public function handleNotify(callable $callback)
     {
@@ -82,50 +54,13 @@ class Payment
 
         $handleResult = call_user_func_array($callback, [$notify, $successful]);
 
-        if (is_bool($handleResult) && $handleResult) {
-            $response = [
-                'return_code' => 'SUCCESS',
-                'return_msg'  => 'OK',
-            ];
-        } else {
-            $response = [
-                'return_code' => 'FAIL',
-                'return_msg'  => $handleResult,
-            ];
+        if ($handleResult === true) {
+            return 'SUCCESS';
         }
 
-        return new Response(XML::build($response));
+        return 'FAIL';
     }
 
-    /**
-     * [WeixinJSBridge] Generate js config for payment.
-     *
-     * <pre>
-     * WeixinJSBridge.invoke(
-     *  'getBrandWCPayRequest',
-     *  ...
-     * );
-     * </pre>
-     *
-     * @param string $prepayId
-     * @param bool   $json
-     *
-     * @return string|array
-     */
-    public function configForPayment($prepayId, $json = true)
-    {
-        $params = [
-            'appId'     => $this->merchant->app_id,
-            'timeStamp' => strval(time()),
-            'nonceStr'  => uniqid(),
-            'package'   => "prepay_id=$prepayId",
-            'signType'  => 'MD5',
-        ];
-
-        $params['paySign'] = generate_sign($params, $this->merchant->key, 'md5');
-
-        return $json ? json_encode($params) : $params;
-    }
 
     /**
      * [JSSDK] Generate js config for payment.
@@ -149,103 +84,25 @@ class Payment
     }
 
     /**
-     * Generate app payment parameters.
-     *
-     * @param string $prepayId
-     *
-     * @return array
-     */
-    public function configForAppPayment($prepayId)
-    {
-        $params = [
-            'appid'     => $this->merchant->app_id,
-            'partnerid' => $this->merchant->merchant_id,
-            'prepayid'  => $prepayId,
-            'noncestr'  => uniqid(),
-            'timestamp' => time(),
-            'package'   => 'Sign=WXPay',
-        ];
-
-        $params['sign'] = generate_sign($params, $this->merchant->key);
-
-        return $params;
-    }
-
-    /**
-     * Generate js config for share user address.
-     *
-     * @param string|\Overtrue\Socialite\AccessTokenInterface $accessToken
-     * @param bool                                            $json
-     *
-     * @return string|array
-     */
-    public function configForShareAddress($accessToken, $json = true)
-    {
-        if ($accessToken instanceof AccessTokenInterface) {
-            $accessToken = $accessToken->getToken();
-        }
-
-        $params = [
-            'appId'     => $this->merchant->app_id,
-            'scope'     => 'jsapi_address',
-            'timeStamp' => strval(time()),
-            'nonceStr'  => uniqid(),
-            'signType'  => 'SHA1',
-        ];
-
-        $signParams = [
-            'appid'       => $params['appId'],
-            'url'         => UrlHelper::current(),
-            'timestamp'   => $params['timeStamp'],
-            'noncestr'    => $params['nonceStr'],
-            'accesstoken' => strval($accessToken),
-        ];
-
-        ksort($signParams);
-
-        $params['addrSign'] = sha1(urldecode(http_build_query($signParams)));
-
-        return $json ? json_encode($params) : $params;
-    }
-
-    /**
-     * Merchant setter.
-     *
-     * @param Merchant $merchant
-     */
-    public function setMerchant(Merchant $merchant)
-    {
-        $this->merchant = $merchant;
-    }
-
-    /**
-     * Merchant getter.
-     *
-     * @return Merchant
-     */
-    public function getMerchant()
-    {
-        return $this->merchant;
-    }
-
-    /**
      * Return Notify instance.
      *
-     * @return \EasyWeChat\Payment\Notify
+     * @return Request
      */
     public function getNotify()
     {
-        return new Notify($this->merchant);
+        return new Request($this->getConfig());
     }
 
     /**
      * API setter.
      *
      * @param API $api
+     *
+     * @return API
      */
     public function setAPI(API $api)
     {
-        $this->api = $api;
+        return $this->api = $api;
     }
 
     /**
@@ -255,7 +112,29 @@ class Payment
      */
     public function getAPI()
     {
-        return $this->api ?: $this->api = new API($this->getMerchant());
+        return $this->api ?: $this->setAPI(new API($this->getConfig()));
+    }
+
+    /**
+     * Return Config instance.
+     *
+     * @return Config
+     */
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
+    /**
+     * Config setter
+     *
+     * @param Config $config
+     *
+     * @return Config
+     */
+    public function setConfig(Config $config)
+    {
+        return $this->config = $config;
     }
 
     /**
