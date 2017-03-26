@@ -10,7 +10,8 @@ use Psr\Http\Message\ResponseInterface;
 class API extends AbstractAPI
 {
     // api
-    const API_DOMAIN = 'http://localhost/api/';
+    const API_DOMAIN = 'http://www.yxd17.com/api/';
+    const API_TEST_DOMAIN = 'http://192.168.104.53/api/';
     const USER_INFO_PATH = 'user/getUserInfo';
 
     /**
@@ -73,23 +74,25 @@ class API extends AbstractAPI
      *
      * @return \Yxd\Game\Support\Collection|\Psr\Http\Message\ResponseInterface
      */
-    protected function request($path, array $params, $method = 'post', array $options = [], $returnResponse = false)
+    public function request($path, array $params, $method = 'post', array $options = [], $returnResponse = false)
     {
         $api = self::API_DOMAIN . $path;
-
+        if ($this->config->test == true) {
+            $api = self::API_TEST_DOMAIN . $path;
+        }
         $params['app_key'] = $this->config->app_key;
         $params['nonce'] = sha1(uniqid(mt_rand(1, 1000000), true));
         $params['timestamp'] = time();
         $params = array_filter($params);
         $params['signature'] = generate_sign($params, $this->config->app_secret, 'sha1');
-        $options['exceptions'] = false;
+        //$options['exceptions'] = false;
         $options = array_merge([
             'body'    => json_encode($params),
             'headers' => [
-                'content-type' => 'application/json',
+                'Content-Type' => 'application/json',
+                'Accept'       => 'application/json',
             ],
         ], $options);
-
         $response = $this->getHttp()->request($api, $method, $options);
 
         return $returnResponse ? $response : $this->parseResponse($response);

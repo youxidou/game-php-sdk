@@ -63,11 +63,14 @@ class Request
     /**
      * Set Request Data.
      *
-     * @return \Yxd\Game\Support\Collection
+     * @param $data
      *
+     * @return $this
      */
     public function setData($data)
     {
-        return $this->data = new Collection($data);
+        $this->data = new Collection((array)$data);
+
+        return $this;
     }
 }

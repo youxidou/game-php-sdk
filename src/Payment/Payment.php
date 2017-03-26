@@ -1,8 +1,9 @@
 <?php namespace Yxd\Game\Payment;
 
-use GuzzleHttp\Psr7\Request;
 use Yxd\Game\Core\API;
 use Yxd\Game\Core\Exceptions\FaultException;
+use Yxd\Game\Foundation\Config;
+use Yxd\Game\Foundation\Request;
 
 /**
  * Class Payment.
@@ -11,6 +12,7 @@ use Yxd\Game\Core\Exceptions\FaultException;
  */
 class Payment
 {
+    const API_PREPARE_ORDER = 'pay/unified/order';
 
     /**
      * @var API
@@ -20,7 +22,7 @@ class Payment
     /**
      * config instance.
      *
-     * @var \Yxd\Game\Support\Config
+     * @var \Yxd\Game\Foundation\Config
      */
     protected $config;
 
@@ -32,6 +34,26 @@ class Payment
     public function __construct(Config $config)
     {
         $this->config = $config;
+    }
+
+    /**
+     * Prepare order to pay.
+     *
+     * @param Order $order
+     *
+     * @return \Yxd\Game\Support\Collection
+     * @throws FaultException
+     */
+    public function prepare(Order $order)
+    {
+        $order->notify_url = $order->get('notify_url', $this->config->notify_url);
+
+        $data = $this->request(self::API_PREPARE_ORDER, $order->all());
+        if (!(new Request($this->getConfig()))->setData($data->toArray())->isValid()) {
+            throw new FaultException('Invalid request payloads.', 400);
+        }
+
+        return $data;
     }
 
     /**
@@ -61,26 +83,27 @@ class Payment
         return 'FAIL';
     }
 
-
     /**
-     * [JSSDK] Generate js config for payment.
+     * Generate js config for pay.
      *
-     * <pre>
-     * wx.chooseWXPay({...});
-     * </pre>
      *
-     * @param string $prepayId
+     * @param string $prepay_id
+     * @param bool   $json
      *
-     * @return array|string
+     * @return string|array
      */
-    public function configForJSSDKPayment($prepayId)
+    public function configForPay($prepay_id, $json = true)
     {
-        $config = $this->configForPayment($prepayId, false);
+        $params = [
+            'app_key'   => $this->config->app_key,
+            'timestamp' => strval(time()),
+            'nonce'     => sha_nonce(),
+            'prepay_id' => $prepay_id,
+        ];
 
-        $config['timestamp'] = $config['timeStamp'];
-        unset($config['timeStamp']);
+        $params['signature'] = generate_sign($params, $this->config->app_secret, 'sha1');
 
-        return $config;
+        return $json ? json_encode($params) : $params;
     }
 
     /**
@@ -150,7 +173,7 @@ class Payment
     public function __call($method, $args)
     {
         if (is_callable([$this->getAPI(), $method])) {
-            return call_user_func_array([$this->api, $method], $args);
+            return call_user_func_array([$this->getAPI(), $method], $args);
         }
     }
 }

@@ -7,6 +7,8 @@ use Yxd\Game\Support\Collection;
  *
  * @property string $app_key
  * @property string $app_secret
+ * @property string $notify_url
+ * @property string $test
  */
 class Config extends Collection
 {
