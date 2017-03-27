@@ -49,8 +49,10 @@ class Payment
         $order->notify_url = $order->get('notify_url', $this->config->notify_url);
 
         $data = $this->request(self::API_PREPARE_ORDER, $order->all());
-        if (!(new Request($this->getConfig()))->setData($data->toArray())->isValid()) {
-            throw new FaultException('Invalid request payloads.', 400);
+        if ($data->result_code == 'SUCCESS') {
+            if (!(new Request($this->getConfig()))->setData($data->toArray())->isValid()) {
+                throw new FaultException('Invalid request payloads.', 400);
+            }
         }
 
         return $data;
