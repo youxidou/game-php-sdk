@@ -1,5 +1,10 @@
 # 游戏兜平台接入php-SDK
 
+[![Latest Stable Version](https://poser.pugx.org/yxd/game-sdk/v/stable)](https://packagist.org/packages/yxd/game-sdk)
+[![Total Downloads](https://poser.pugx.org/yxd/game-sdk/downloads)](https://packagist.org/packages/yxd/game-sdk)
+[![License](https://poser.pugx.org/yxd/game-sdk/license)](https://packagist.org/packages/yxd/game-sdk)
+
+
 - 你在阅读本文之前确认你已经仔细阅读了： [游戏兜平台接入文档](https://github.com/youxidou/doc/blob/master/development_doc.md)
 
 ### 配置
