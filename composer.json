@@ -1,6 +1,7 @@
 {
     "name": "yxd/game-sdk",
     "description": "接入游戏兜平台sdk",
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "Yxd\\Game\\": "src/"
