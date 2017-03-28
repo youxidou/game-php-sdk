@@ -57,7 +57,9 @@ class Request
 
         $data = array_merge($_POST, $_GET);
 
-        return $this->setData($data);
+        $this->setData($data);
+
+        return $this->data;
     }
 
     /**

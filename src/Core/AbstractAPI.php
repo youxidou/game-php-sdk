@@ -79,7 +79,7 @@ abstract class AbstractAPI
     protected function registerHttpMiddlewares()
     {
         // retry
-        $this->http->addMiddleware($this->retryMiddleware());
+        //$this->http->addMiddleware($this->retryMiddleware());
     }
 
     /**
@@ -96,12 +96,25 @@ abstract class AbstractAPI
         ) {
             // Limit the number of retries to 2
             if ($retries <= 2 && $response && $response->getStatusCode() >= 500) {
+                $request = $this->retryRequest($request);
+
                 return true;
             }
 
             return false;
         });
     }
+
+    /**
+     * Retry request
+     *
+     * @param RequestInterface $request
+     */
+    protected function retryRequest(RequestInterface $request)
+    {
+        return $request;
+    }
+
 
     /**
      * Check the array data errors, and Throw exception when the contents contains error.

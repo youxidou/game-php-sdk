@@ -1,5 +1,6 @@
 <?php namespace Yxd\Game\Core;
 
+use Psr\Http\Message\RequestInterface;
 use Yxd\Game\Foundation\Config;
 use Yxd\Game\Support\Collection;
 use Psr\Http\Message\ResponseInterface;
@@ -81,11 +82,11 @@ class API extends AbstractAPI
             $api = self::API_TEST_DOMAIN . $path;
         }
         $params['app_key'] = $this->config->app_key;
-        $params['nonce'] = sha1(uniqid(mt_rand(1, 1000000), true));
+        $params['nonce'] = md5(uniqid(mt_rand(1, 1000000), true));
         $params['timestamp'] = time();
         $params = array_filter($params);
         $params['signature'] = generate_sign($params, $this->config->app_secret, 'sha1');
-        //$options['exceptions'] = false;
+//        $options['exceptions'] = false;
         $options = array_merge([
             'body'    => json_encode($params),
             'headers' => [
@@ -96,6 +97,26 @@ class API extends AbstractAPI
         $response = $this->getHttp()->request($api, $method, $options);
 
         return $returnResponse ? $response : $this->parseResponse($response);
+    }
+
+    /**
+     * Retry request
+     *
+     * @param RequestInterface $request
+     */
+    protected function retryRequest(RequestInterface $request)
+    {
+        $content = (string)$request->getBody();
+        $data = json_decode($content, true);
+        unset($data['signature']);
+
+        $data['nonce'] = md5(uniqid(mt_rand(1, 1000000), true));
+        $data['timestamp'] = time();
+        $data['signature'] = generate_sign($data, $this->config->app_secret, 'sha1');
+
+        $stream = \GuzzleHttp\Psr7\stream_for(json_encode($data));
+
+        return $request->withBody($stream);
     }
 
     /**
