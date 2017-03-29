@@ -11,8 +11,8 @@ use Psr\Http\Message\ResponseInterface;
 class API extends AbstractAPI
 {
     // api
-    const API_DOMAIN = 'http://www.yxd17.com/api/';
-    const API_TEST_DOMAIN = 'http://192.168.104.53/api/';
+    const API_DOMAIN = 'https://gg.yxd17.com/api/';
+    const API_TEST_DOMAIN = 'https://gg.yxd17.com/api/';
     const USER_INFO_PATH = 'user/getUserInfo';
 
     /**
