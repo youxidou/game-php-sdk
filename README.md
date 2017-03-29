@@ -6,6 +6,7 @@
 
 
 - 你在阅读本文之前确认你已经仔细阅读了： [游戏兜平台接入文档](https://github.com/youxidou/doc/blob/master/development_doc.md)
+- 可以查看应用该sdk的[demo](https://github.com/youxidou/game-php-demo)
 
 ### 配置
 
@@ -105,4 +106,4 @@ $response = $app->payment->handleNotify(function($notify, $successful){
 });	
 
 return $response;
-``
+```

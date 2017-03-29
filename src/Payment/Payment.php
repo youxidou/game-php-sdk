@@ -73,8 +73,8 @@ class Payment
             throw new FaultException('Invalid request payloads.', 400);
         }
 
-        $notify = $notify->getNotify();
-        $successful = $notify->get('result_code') === 'SUCCESS';
+        $notify = $notify->getData();
+        $successful = $notify->get('trade_result') === 'SUCCESS';
 
         $handleResult = call_user_func_array($callback, [$notify, $successful]);
 

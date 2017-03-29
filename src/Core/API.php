@@ -77,10 +77,11 @@ class API extends AbstractAPI
      */
     public function request($path, array $params, $method = 'post', array $options = [], $returnResponse = false)
     {
-        $api = self::API_DOMAIN . $path;
-        if ($this->config->test == true) {
-            $api = self::API_TEST_DOMAIN . $path;
+        $domain = $this->config->domain;
+        if (!$domain) {
+            $domain = $this->config->test == true ? self::API_TEST_DOMAIN : self::API_DOMAIN;
         }
+        $api = $domain . $path;
         $params['app_key'] = $this->config->app_key;
         $params['nonce'] = md5(uniqid(mt_rand(1, 1000000), true));
         $params['timestamp'] = time();
