@@ -9,3 +9,6 @@ php:
   # aliased to a recent 7.0.x version
   - 7.0
 
+install: travis_retry composer install --no-interaction --prefer-source
+
+script: vendor/bin/phpunit --verbose
