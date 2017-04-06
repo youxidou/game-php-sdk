@@ -11,8 +11,7 @@ use Psr\Http\Message\ResponseInterface;
 class API extends AbstractAPI
 {
     // api
-    const API_DOMAIN = 'https://gg.yxd17.com/api/';
-    const API_TEST_DOMAIN = 'https://gg.yxd17.com/api/';
+    const API_DOMAIN = 'https://game.yxd17.com/api/';
     const USER_INFO_PATH = 'user/getUserInfo';
 
     /**
@@ -79,7 +78,7 @@ class API extends AbstractAPI
     {
         $domain = $this->config->domain;
         if (!$domain) {
-            $domain = $this->config->test == true ? self::API_TEST_DOMAIN : self::API_DOMAIN;
+            $domain = self::API_DOMAIN;
         }
         $api = $domain . $path;
         $params['app_key'] = $this->config->app_key;
